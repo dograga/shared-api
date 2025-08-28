@@ -49,7 +49,7 @@ GROUP_MAPPING = {
 }
 
 # Request schema
-class ApprovalGroupRequest(BaseModel):
+class GroupRequest(BaseModel):
     appcode: str
     types: List[str] = Field(..., min_items=1, description="List of types (must not be empty)")
 
@@ -58,8 +58,18 @@ class ApprovalGroupResponse(BaseModel):
     type: str
     group: str
 
+@app.post("/validate-requestor-groups")
+def validate_appcode(payload: GroupRequest):
+    logger.info("Requestor Group Payload: %s", payload)
+    return {"valid": True}
+
+@app.post("/get-vm-instances", response_model=List[str])
+def get_vm_instances(payload: AppCodeRequest):
+    return ["testserver1"]
+
 @app.post("/get-approvalgroups", response_model=List[ApprovalGroupResponse])
-def get_approval_groups(payload: ApprovalGroupRequest):
+def get_approval_groups(payload: GroupRequest):
+    logger.info("Payload: %s", payload)
     invalid_types = [t for t in payload.types if t not in GROUP_MAPPING]
     logger.info("Received request to get approval groups", appcode=payload.appcode, types=payload.types)
     if invalid_types:
